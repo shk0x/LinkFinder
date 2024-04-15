@@ -129,13 +129,16 @@ def send_request(url):
     q.add_header('Accept-Language', 'en-US,en;q=0.8')
     q.add_header('Accept-Encoding', 'gzip')
     q.add_header('Cookie', args.cookies)
+    
+    sslcontext = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    sslcontext.check_hostname = False
+    sslcontext.verify_mode = ssl.CERT_NONE
 
+    
     try:
-        sslcontext = ssl.create_default_context()
         response = urlopen(q, timeout=args.timeout, context=sslcontext)
-    except:
-        sslcontext = ssl.create_default_context()
-        response = urlopen(q, timeout=args.timeout, context=sslcontext)
+    except Exception as e:
+        print(f"Failed to open URL due to: {e}")
 
     if response.info().get('Content-Encoding') == 'gzip':
         data = GzipFile(fileobj=readBytesCustom(response.read())).read()
